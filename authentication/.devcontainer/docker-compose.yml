@@ -1,0 +1,13 @@
+version: "3"
+services:
+  authentication:
+    image: bhongy/vscode-remote-devcontainer.go
+    volumes:
+      - ../..:/workspaces/kimidori:delegated
+    command: /bin/sh -c "while sleep 1000; do :; done"
+
+    # security and capability needed for ptrace-based debugger for golang
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined

@@ -1,0 +1,15 @@
+{
+  "name": "kimidori.${localWorkspaceFolderBasename}",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "authentication",
+  "workspaceFolder": "/workspaces/kimidori/${localWorkspaceFolderBasename}",
+  "settings": { 
+		"terminal.integrated.shell.linux": "/bin/zsh",
+		"go.gopath": "/go",
+    "go.useLanguageServer": true
+  },
+  "extensions": [
+    "golang.Go",
+  ],
+  "forwardPorts": [8081]
+}
