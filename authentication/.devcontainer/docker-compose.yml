@@ -11,3 +11,12 @@ services:
       - SYS_PTRACE
     security_opt:
       - seccomp:unconfined
+
+    depends_on:
+      - database
+
+  database:
+    image: postgres:12.4-alpine
+    restart: unless-stopped
+    user: postgres
+    env_file: .env

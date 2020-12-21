@@ -9,3 +9,7 @@ authentication answers whether a credential is valid i.e. the user providing the
 - log out
 - delete an account
 - reset password
+
+## Before using devcontainer for the first time
+
+- make a copy of `.env.example` to `.env` and fill in the appropriate environment variables
