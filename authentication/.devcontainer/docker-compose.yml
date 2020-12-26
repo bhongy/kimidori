@@ -2,6 +2,7 @@ version: "3"
 services:
   authentication:
     image: bhongy/vscode-remote-devcontainer.go
+    env_file: .env
     volumes:
       # we need to mount at the root so `.git` is included
       - ../..:/workspaces/kimidori:delegated
@@ -18,11 +19,11 @@ services:
 
   database:
     image: postgres:12.4-alpine
+    env_file: .env
     volumes:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
     user: postgres
-    env_file: .env
 
 volumes:
   postgres-data:
