@@ -46,3 +46,27 @@ func CreateUser(w SQLWriter, username, password string) (u User, err error) {
 	}
 	return
 }
+
+// Create creates a new user in the database
+//
+// it is an alternative (experimental) API to `CreateUser`
+//
+// this API doesn't require passing a function to produce uuid, timestamp
+// but let that be the caller's concern
+func (u *User) Create(db *sql.DB, plaintextPassword string) error {
+	// TODO: encrypt password
+	u.Password = plaintextPassword
+	q := `
+		INSERT INTO users (uuid, username, password, created_at)
+		VALUES ($1, $2, $3, $4)
+		RETURNING
+			id
+	`
+	err := db.
+		QueryRow(q, u.UUID, u.Username, plaintextPassword, u.CreatedAt).
+		Scan(&u.ID)
+	if err != nil {
+		return fmt.Errorf("create user: %v", err)
+	}
+	return nil
+}

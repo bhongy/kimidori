@@ -94,3 +94,87 @@ func TestCreateUser(t *testing.T) {
 		}
 	}) // t.Run("failed", ...)
 }
+
+func TestUser_Create(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		db, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("Fail creating SQL mock: %v\n", err)
+		}
+		defer db.Close()
+
+		u := data.User{
+			UUID:      "test_uuid_17fc",
+			Username:  "test_username",
+			CreatedAt: time.Now(),
+		}
+		password := "test_password"
+
+		id := 42
+		rows := sqlmock.
+			NewRows([]string{"id"}).
+			AddRow(id)
+
+		mock.
+			ExpectQuery("^INSERT INTO users (.+) VALUES (.+) RETURNING id").
+			WithArgs(u.UUID, u.Username, password, u.CreatedAt).
+			WillReturnRows(rows)
+
+		err = u.Create(db, password)
+		if err != nil {
+			t.Error(err)
+		}
+
+		want := data.User{
+			ID:        id,
+			UUID:      u.UUID,
+			Username:  u.Username,
+			Password:  password,
+			CreatedAt: u.CreatedAt,
+		}
+		if u != want {
+			t.Errorf("\ngot: %v\nwant: %v", u, want)
+		}
+
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("unfulfilled expectations: %s", err)
+		}
+	})
+
+	t.Run("failed", func(t *testing.T) {
+		t.Parallel()
+
+		db, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("Fail creating SQL mock: %v\n", err)
+		}
+		defer db.Close()
+
+		u := data.User{
+			UUID:      "test_uuid_17fc",
+			Username:  "test_username",
+			CreatedAt: time.Now(),
+		}
+		password := "test_password"
+
+		mock.
+			ExpectQuery("^INSERT INTO users (.+) VALUES (.+) RETURNING id").
+			WithArgs(u.UUID, u.Username, password, u.CreatedAt).
+			WillReturnError(errors.New("Stub error from executing the query"))
+
+		err = u.Create(db, password)
+		if err == nil {
+			t.Error(errors.New("Expect error to be returned but got `nil`"))
+		}
+
+		if got := u.ID; got != 0 {
+			t.Errorf("Expect User.ID to be 0 but got: %v", got)
+		}
+
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("unfulfilled expectations: %s", err)
+		}
+	}) // t.Run("failed", ...)
+}
