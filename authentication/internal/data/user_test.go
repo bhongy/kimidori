@@ -1,6 +1,7 @@
 package data_test
 
 import (
+	"database/sql"
 	"errors"
 	"testing"
 	"time"
@@ -9,14 +10,20 @@ import (
 	"github.com/bhongy/kimidori/authentication/internal/data"
 )
 
+// createSqlMock initializes a new db and sqlmock instances
+func createSqlMock(t *testing.T) (db *sql.DB, mock sqlmock.Sqlmock) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Fail creating SQL mock: %v\n", err)
+	}
+	return
+}
+
 func TestCreateUser(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		db, mock, err := sqlmock.New()
-		if err != nil {
-			t.Fatalf("Fail creating SQL mock: %v\n", err)
-		}
+		db, mock := createSqlMock(t)
 		defer db.Close()
 
 		username := "test_username"
@@ -61,10 +68,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("failed", func(t *testing.T) {
 		t.Parallel()
 
-		db, mock, err := sqlmock.New()
-		if err != nil {
-			t.Fatalf("Fail creating SQL mock: %v\n", err)
-		}
+		db, mock := createSqlMock(t)
 		defer db.Close()
 
 		username := "test_username"
@@ -99,10 +103,7 @@ func TestUser_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		db, mock, err := sqlmock.New()
-		if err != nil {
-			t.Fatalf("Fail creating SQL mock: %v\n", err)
-		}
+		db, mock := createSqlMock(t)
 		defer db.Close()
 
 		u := data.User{
@@ -122,8 +123,7 @@ func TestUser_Create(t *testing.T) {
 			WithArgs(u.UUID, u.Username, password, u.CreatedAt).
 			WillReturnRows(rows)
 
-		err = u.Create(db, password)
-		if err != nil {
+		if err := u.Create(db, password); err != nil {
 			t.Error(err)
 		}
 
@@ -146,10 +146,7 @@ func TestUser_Create(t *testing.T) {
 	t.Run("failed", func(t *testing.T) {
 		t.Parallel()
 
-		db, mock, err := sqlmock.New()
-		if err != nil {
-			t.Fatalf("Fail creating SQL mock: %v\n", err)
-		}
+		db, mock := createSqlMock(t)
 		defer db.Close()
 
 		u := data.User{
@@ -164,8 +161,7 @@ func TestUser_Create(t *testing.T) {
 			WithArgs(u.UUID, u.Username, password, u.CreatedAt).
 			WillReturnError(errors.New("Stub error from executing the query"))
 
-		err = u.Create(db, password)
-		if err == nil {
+		if err := u.Create(db, password); err == nil {
 			t.Error(errors.New("Expect error to be returned but got `nil`"))
 		}
 
