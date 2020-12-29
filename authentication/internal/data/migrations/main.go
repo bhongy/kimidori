@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/bhongy/kimidori/authentication/internal/data"
+	pg "github.com/bhongy/kimidori/authentication/internal/data/postgres"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -41,7 +41,11 @@ func main() {
 // newMigrate instantiates a new migreate.Migrate using postgres driver
 // for migration files in `dir`
 func newMigrate(dir string) (m *migrate.Migrate, err error) {
-	driver, err := postgres.WithInstance(data.Db, &postgres.Config{})
+	db, err := pg.NewDB()
+	if err != nil {
+		return
+	}
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		return
 	}
