@@ -11,10 +11,19 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	// make "postgres" driver available for `sql.Open`
 	_ "github.com/lib/pq"
 )
+
+// SQLWriter provides an interface to inject dependencies
+// for writing data to the underlying SQL database
+type SQLWriter interface {
+	DB() *sql.DB
+	NewUUID() string
+	Now() time.Time
+}
 
 // Db is the singleton SQL db connection
 var Db *sql.DB

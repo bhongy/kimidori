@@ -6,14 +6,6 @@ import (
 	"time"
 )
 
-// SQLWriter provides an interface to inject dependencies
-// for writing data to the underlying SQL database
-type SQLWriter interface {
-	DB() *sql.DB
-	NewUUID() string
-	Now() time.Time
-}
-
 type User struct {
 	ID        int
 	UUID      string
