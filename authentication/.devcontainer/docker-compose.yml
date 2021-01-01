@@ -1,4 +1,9 @@
 version: "3"
+
+networks:
+  devcontainer:
+    driver: bridge
+
 services:
   authentication:
     image: bhongy/vscode-remote-devcontainer.go
@@ -6,6 +11,8 @@ services:
     volumes:
       # we need to mount at the root so `.git` is included
       - ../..:/workspaces/kimidori:delegated
+    networks:
+      - devcontainer
     command: sleep infinity
 
     # security and capability needed for ptrace-based debugger for golang
@@ -22,6 +29,8 @@ services:
     env_file: .env
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    networks:
+      - devcontainer
     restart: unless-stopped
     user: postgres
 
