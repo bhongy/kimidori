@@ -3,6 +3,7 @@ package data_test
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"testing"
 	"time"
 
@@ -10,11 +11,14 @@ import (
 	"github.com/bhongy/kimidori/authentication/internal/data"
 )
 
-// createSqlMock initializes a new db and sqlmock instances
-func createSqlMock(t *testing.T) (db *sql.DB, mock sqlmock.Sqlmock) {
+var ErrCreate = errors.New("(stub) cannot create user")
+var now = time.Now()
+
+// newMock initializes a new db and sqlmock instances
+func newMock() (db *sql.DB, mock sqlmock.Sqlmock) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatalf("Fail creating SQL mock: %v\n", err)
+		log.Fatalf("Error creating SQL mock: %v\n", err)
 	}
 	return
 }
@@ -23,7 +27,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		db, mock := createSqlMock(t)
+		db, mock := newMock()
 		defer db.Close()
 
 		username := "test_username"
@@ -31,7 +35,7 @@ func TestCreateUser(t *testing.T) {
 		w := testSQLWriter{
 			db:   db,
 			uuid: "test_uuid_17fc",
-			now:  time.Now(),
+			now:  now,
 		}
 
 		id := 42
@@ -57,7 +61,7 @@ func TestCreateUser(t *testing.T) {
 			CreatedAt: w.now,
 		}
 		if got != want {
-			t.Errorf("\ngot: %v\nwant: %v", got, want)
+			t.Errorf("\nExpected User: %v\nGot User: %v", want, got)
 		}
 
 		if err := mock.ExpectationsWereMet(); err != nil {
@@ -68,7 +72,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("failed", func(t *testing.T) {
 		t.Parallel()
 
-		db, mock := createSqlMock(t)
+		db, mock := newMock()
 		defer db.Close()
 
 		username := "test_username"
@@ -76,13 +80,13 @@ func TestCreateUser(t *testing.T) {
 		w := testSQLWriter{
 			db:   db,
 			uuid: "test_uuid_17fc",
-			now:  time.Now(),
+			now:  now,
 		}
 
 		mock.
 			ExpectQuery("^INSERT INTO users (.+) VALUES (.+) RETURNING id").
 			WithArgs(w.uuid, username, password, w.now).
-			WillReturnError(errors.New("Stub error from executing the query"))
+			WillReturnError(ErrCreate)
 
 		got, err := data.CreateUser(w, username, password)
 		if err == nil {
@@ -103,13 +107,13 @@ func TestUser_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		db, mock := createSqlMock(t)
+		db, mock := newMock()
 		defer db.Close()
 
 		u := data.User{
 			UUID:      "test_uuid_17fc",
 			Username:  "test_username",
-			CreatedAt: time.Now(),
+			CreatedAt: now,
 		}
 		password := "test_password"
 
@@ -135,7 +139,7 @@ func TestUser_Create(t *testing.T) {
 			CreatedAt: u.CreatedAt,
 		}
 		if u != want {
-			t.Errorf("\ngot: %v\nwant: %v", u, want)
+			t.Errorf("\nExpected User: %v\nGot User: %v", want, u)
 		}
 
 		if err := mock.ExpectationsWereMet(); err != nil {
@@ -146,20 +150,20 @@ func TestUser_Create(t *testing.T) {
 	t.Run("failed", func(t *testing.T) {
 		t.Parallel()
 
-		db, mock := createSqlMock(t)
+		db, mock := newMock()
 		defer db.Close()
 
 		u := data.User{
 			UUID:      "test_uuid_17fc",
 			Username:  "test_username",
-			CreatedAt: time.Now(),
+			CreatedAt: now,
 		}
 		password := "test_password"
 
 		mock.
 			ExpectQuery("^INSERT INTO users (.+) VALUES (.+) RETURNING id").
 			WithArgs(u.UUID, u.Username, password, u.CreatedAt).
-			WillReturnError(errors.New("Stub error from executing the query"))
+			WillReturnError(ErrCreate)
 
 		if err := u.Create(db, password); err == nil {
 			t.Error(errors.New("Expect error to be returned but got `nil`"))

@@ -15,12 +15,12 @@ type User struct {
 }
 
 // CreateUser creates a new user in the database
-func CreateUser(w SQLWriter, username, password string) (u User, err error) {
+func CreateUser(w SQLWriter, username, plaintextPassword string) (User, error) {
 	// TODO: encrypt password
-	u = User{
+	u := User{
 		UUID:      w.NewUUID(),
 		Username:  username,
-		Password:  password,
+		Password:  plaintextPassword,
 		CreatedAt: w.Now(),
 	}
 	q := `
@@ -29,14 +29,13 @@ func CreateUser(w SQLWriter, username, password string) (u User, err error) {
 		RETURNING
 			id
 	`
-	err = w.DB().
+	err := w.DB().
 		QueryRow(q, u.UUID, u.Username, u.Password, u.CreatedAt).
 		Scan(&u.ID)
 	if err != nil {
-		u = User{}
-		err = fmt.Errorf("create user: %v", err)
+		return User{}, fmt.Errorf("create user: %v", err)
 	}
-	return
+	return u, nil
 }
 
 // Create creates a new user in the database
