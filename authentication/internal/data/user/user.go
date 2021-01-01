@@ -13,10 +13,11 @@ type Repository interface {
 }
 
 type User struct {
-	ID        int
-	UUID      uuid.UUID
-	Username  string
-	Password  string
+	ID       int
+	UUID     uuid.UUID
+	Username string
+	// Password is the hashed password as stored in the database
+	Password  []byte
 	CreatedAt time.Time
 }
 

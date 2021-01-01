@@ -12,14 +12,6 @@ import (
 	"github.com/google/uuid"
 )
 
-var u = user.User{
-	ID:        42,
-	UUID:      uuid.New(),
-	Username:  "test_username",
-	Password:  "test_password",
-	CreatedAt: time.Now(),
-}
-
 var ErrCreate = errors.New("(stub) cannot create user")
 
 func NewMock() (*sql.DB, sqlmock.Sqlmock) {
@@ -28,6 +20,21 @@ func NewMock() (*sql.DB, sqlmock.Sqlmock) {
 		log.Fatalf("Error creating SQL mock: %v\n", err)
 	}
 	return db, mock
+}
+
+func NewTestUser() user.User {
+	password, err := user.NewPassword("test_password")
+	if err != nil {
+		log.Fatalf("Error creating password: %v", err)
+	}
+
+	return user.User{
+		ID:        42,
+		UUID:      uuid.New(),
+		Username:  "test_username",
+		Password:  password,
+		CreatedAt: time.Now(),
+	}
 }
 
 func TestUser_Create(t *testing.T) {
@@ -39,6 +46,7 @@ func TestUser_Create(t *testing.T) {
 		defer repo.Close()
 
 		query := "INSERT INTO users (.+) VALUES (.+) RETURNING id"
+		u := NewTestUser()
 		rows := sqlmock.NewRows([]string{"id"}).AddRow(u.ID)
 		mock.
 			ExpectQuery(query).
@@ -57,15 +65,8 @@ func TestUser_Create(t *testing.T) {
 			t.Errorf("Expect no error but got: %v", err)
 		}
 
-		want := user.User{
-			ID:        u.ID,
-			UUID:      u.UUID,
-			Username:  u.Username,
-			Password:  u.Password,
-			CreatedAt: u.CreatedAt,
-		}
-		if newUser != want {
-			t.Errorf("\ngot: %v\nwant: %v", newUser, want)
+		if newUser.ID != u.ID {
+			t.Errorf("Expect u.ID to be %v but got: %v", u.ID, newUser.ID)
 		}
 
 		if err := mock.ExpectationsWereMet(); err != nil {
@@ -81,6 +82,7 @@ func TestUser_Create(t *testing.T) {
 		defer repo.Close()
 
 		query := "INSERT INTO users (.+) VALUES (.+) RETURNING id"
+		u := NewTestUser()
 		mock.
 			ExpectQuery(query).
 			WithArgs(u.UUID, u.Username, u.Password, u.CreatedAt).

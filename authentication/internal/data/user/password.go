@@ -7,9 +7,7 @@ import (
 )
 
 // password is the hash of plain text password
-type password struct {
-	hashed string
-}
+type password []byte
 
 // NewPassword creates a new hash of a plain-text password
 func NewPassword(plainText string) (password, error) {
@@ -17,8 +15,7 @@ func NewPassword(plainText string) (password, error) {
 	if err != nil {
 		return password{}, fmt.Errorf("new password: bcrypt.GenerateFromPassword error: %v", err)
 	}
-	p := password{string(h)}
-	return p, nil
+	return password(h), nil
 }
 
 // String returns a string representation of the Password
@@ -26,14 +23,11 @@ func NewPassword(plainText string) (password, error) {
 //
 // Do not use it to compare passwords
 func (p password) String() string {
-	return p.hashed
+	return string(p)
 }
 
 // CheckPassword checks the given plain-text password against the hashed password
-func CheckPassword(hashed, plainText string) bool {
-	err := bcrypt.CompareHashAndPassword(
-		[]byte(hashed),
-		[]byte(plainText),
-	)
+func CheckPassword(hashed, plainText []byte) bool {
+	err := bcrypt.CompareHashAndPassword(hashed, plainText)
 	return err == nil
 }
