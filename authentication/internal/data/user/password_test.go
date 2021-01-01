@@ -21,14 +21,15 @@ func TestNewPassword(t *testing.T) {
 	}
 }
 
-func TestPassword_Compare(t *testing.T) {
+func TestCheckPassword(t *testing.T) {
 	plainText := "test-password-7oDGpy8iv"
 	p, _ := user.NewPassword(plainText)
+	hashed := p.String()
 
 	t.Run("match", func(t *testing.T) {
 		t.Parallel()
 
-		if !p.Compare(plainText) {
+		if !user.CheckPassword(hashed, plainText) {
 			t.Errorf("Expect the same password to match")
 		}
 	}) // t.Run("match", ...)
@@ -36,7 +37,7 @@ func TestPassword_Compare(t *testing.T) {
 	t.Run("no match", func(t *testing.T) {
 		t.Parallel()
 
-		if p.Compare("foobar") {
+		if user.CheckPassword(hashed, "foobar") {
 			t.Errorf("Expect different passwords not to match")
 		}
 	}) // t.Run("no match", ...)
