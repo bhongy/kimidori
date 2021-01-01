@@ -21,7 +21,7 @@ func (w PostgresWriter) NewUUID() string {
 }
 
 func (w PostgresWriter) Now() time.Time {
-	return time.Now()
+	return time.Now().Truncate(time.Millisecond)
 }
 
 // NewPostgresWriter instantiates a new PostgresWriter
