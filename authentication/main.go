@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -68,8 +69,25 @@ func (h createUser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body, err := json.Marshal(struct {
+		ID        int       `json:"id"`
+		UUID      uuid.UUID `json:"uuid"`
+		Username  string    `json:"username"`
+		CreatedAt time.Time `json:"createdAt"`
+	}{
+		u.ID, u.UUID, u.Username, u.CreatedAt,
+	})
+
+	if err != nil {
+		log.Printf("Error: encode body: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	header := w.Header()
 	location := fmt.Sprintf("/user/%d", u.ID)
 	header.Set("Location", location)
+	header.Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	w.Write(body)
 }
