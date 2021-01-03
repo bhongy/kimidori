@@ -9,6 +9,8 @@ services:
     image: bhongy/vscode-remote-devcontainer.go
     env_file: .env
     volumes:
+      # go module cache, to avoid dependencies re-download on container rebuilds
+      - gomod-cache:/go/pkg/mod/cache
       # we need to mount at the root so `.git` is included
       - ../..:/workspaces/kimidori:delegated
     networks:
@@ -40,4 +42,5 @@ services:
     user: postgres
 
 volumes:
+  gomod-cache:
   postgres-data:
