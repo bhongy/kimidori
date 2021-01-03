@@ -29,9 +29,14 @@ services:
     env_file: .env
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - type: bind
+        source: ./create-testdb.sh
+        target: /docker-entrypoint-initdb.d/01-create-testdb.sh
+        read_only: true
     networks:
       - devcontainer
     restart: unless-stopped
+    # use user created in postgres image instead of root
     user: postgres
 
 volumes:

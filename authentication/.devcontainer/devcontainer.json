@@ -9,7 +9,7 @@
     "go.useLanguageServer": true
   },
   "extensions": [
-    "golang.Go",
+    "golang.go",
     "editorconfig.editorconfig",
   ],
   "forwardPorts": [8081]
