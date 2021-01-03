@@ -6,7 +6,7 @@ networks:
 
 services:
   authentication:
-    image: bhongy/vscode-remote-devcontainer.go
+    build: .
     env_file: .env
     volumes:
       # go module cache, to avoid dependencies re-download on container rebuilds
