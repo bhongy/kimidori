@@ -5,3 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
   password   VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL
 );
+
+---- create above / drop below ----
+
+DROP TABLE IF EXISTS users;

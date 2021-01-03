@@ -10,15 +10,18 @@ It is in the foundation service layer and never to be hit by a public traffic (i
 
 ## Running database migration
 
-> ❗ the migration commands must be run (cwd) from root kimidori/authentication
-
 ```sh
+$ cd internal/data/db/migrations
+
 # applies all migrations
-$ go run ./internal/data/migrations up
+$ tern migrate
 
 # revert all migrations
-$ go run ./internal/data/migrations down
+$ tern migrate -d 0
 
-# see all commands
-$ go run ./internal/data/migrations
+# see current migration status
+$ tern status
+
+# applies all migrations for the test db
+$ tern migrate -c tern-testdb.conf
 ```
