@@ -1,10 +1,11 @@
 package user
 
 import (
-	"database/sql"
+	"context"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 )
 
 type Repository interface {
@@ -22,13 +23,13 @@ type User struct {
 }
 
 type repository struct {
-	db *sql.DB
+	db *pgx.Conn
 }
 
-func NewRepository(db *sql.DB) Repository {
+func NewRepository(db *pgx.Conn) Repository {
 	return &repository{db}
 }
 
 func (r *repository) Close() {
-	r.db.Close()
+	r.db.Close(context.Background())
 }

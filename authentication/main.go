@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bhongy/kimidori/authentication/internal/data/postgres"
+	"github.com/bhongy/kimidori/authentication/internal/data/db"
 	"github.com/bhongy/kimidori/authentication/internal/data/user"
 	"github.com/google/uuid"
 )
 
 func main() {
-	db, err := postgres.NewDB()
+	db, err := db.New()
 	if err != nil {
 		log.Fatal(err)
 	}

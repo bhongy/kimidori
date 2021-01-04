@@ -1,25 +1,47 @@
 package user_test
 
 import (
-	"database/sql"
+	"context"
 	"errors"
 	"log"
 	"testing"
 	"time"
 
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/bhongy/kimidori/authentication/internal/data/db"
 	"github.com/bhongy/kimidori/authentication/internal/data/user"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 )
 
-var ErrCreate = errors.New("(stub) cannot create user")
-
-func NewMock() (*sql.DB, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New()
+func newTestDB() *pgx.Conn {
+	db, err := db.NewTestDB()
 	if err != nil {
-		log.Fatalf("Error creating SQL mock: %v\n", err)
+		log.Fatalf("newTestDB: %v\n", err)
 	}
-	return db, mock
+	// ensure database is clean before each tests
+	clean(db)
+	return db
+}
+
+func clean(db *pgx.Conn) {
+	// cannot use TRUNCATE TABLE due to foreign key constraint
+	q := "DELETE FROM users;"
+	_, err := db.Exec(context.Background(), q)
+	if err != nil {
+		log.Fatalf("Cannot clean db: %v\n", err)
+	}
+}
+
+// findUserByID queries the database for the user for a given ID
+func findUserByID(db *pgx.Conn, userID int) (u user.User, err error) {
+	q := "SELECT uuid, username, created_at FROM users WHERE id = $1"
+	err = db.
+		QueryRow(context.Background(), q, userID).
+		Scan(&u.UUID, &u.Username, &u.CreatedAt)
+	if err != nil {
+		return user.User{}, err
+	}
+	return u, nil
 }
 
 func NewTestUser() user.User {
@@ -29,7 +51,6 @@ func NewTestUser() user.User {
 	}
 
 	return user.User{
-		ID:        42,
 		UUID:      uuid.New(),
 		Username:  "test_username",
 		Password:  password,
@@ -39,20 +60,11 @@ func NewTestUser() user.User {
 
 func TestUser_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		t.Parallel()
-
-		db, mock := NewMock()
+		db := newTestDB()
 		repo := user.NewRepository(db)
 		defer repo.Close()
 
-		query := "INSERT INTO users (.+) VALUES (.+) RETURNING id"
 		u := NewTestUser()
-		rows := sqlmock.NewRows([]string{"id"}).AddRow(u.ID)
-		mock.
-			ExpectQuery(query).
-			WithArgs(u.UUID, u.Username, u.Password, u.CreatedAt).
-			WillReturnRows(rows)
-
 		newUser := user.User{
 			UUID:      u.UUID,
 			Username:  u.Username,
@@ -65,29 +77,32 @@ func TestUser_Create(t *testing.T) {
 			t.Errorf("Expect no error but got: %v", err)
 		}
 
-		if newUser.ID != u.ID {
-			t.Errorf("Expect u.ID to be %v but got: %v", u.ID, newUser.ID)
+		if newUser.ID == 0 {
+			t.Error("Expect user id to be set")
 		}
 
-		if err := mock.ExpectationsWereMet(); err != nil {
-			t.Errorf("unfulfilled expectations: %s", err)
+		uu, err := findUserByID(db, newUser.ID)
+		if err != nil {
+			t.Errorf("Cannot query user (ID=%d): %v", newUser.ID, err)
 		}
+
+		if want, got := u.UUID, uu.UUID; want != got {
+			t.Errorf("Expect UUID to be %q but got %q", want, got)
+		}
+		if want, got := u.Username, uu.Username; want != got {
+			t.Errorf("Expect Username to be %q but got %q", want, got)
+		}
+		// if want, got := u.CreatedAt, uu.CreatedAt; want != got {
+		// 	t.Errorf("Expect CreatedAt to be %q but got %q", want, got)
+		// }
 	}) // t.Run("success", ...)
 
 	t.Run("failed", func(t *testing.T) {
-		t.Parallel()
-
-		db, mock := NewMock()
+		db := newTestDB()
 		repo := user.NewRepository(db)
 		defer repo.Close()
 
-		query := "INSERT INTO users (.+) VALUES (.+) RETURNING id"
 		u := NewTestUser()
-		mock.
-			ExpectQuery(query).
-			WithArgs(u.UUID, u.Username, u.Password, u.CreatedAt).
-			WillReturnError(ErrCreate)
-
 		newUser := user.User{
 			UUID:      u.UUID,
 			Username:  u.Username,
@@ -95,17 +110,16 @@ func TestUser_Create(t *testing.T) {
 			CreatedAt: u.CreatedAt,
 		}
 
+		repo.Create(&newUser)
+		newUser.ID = 0
+		// create the same user should produce an error
 		err := repo.Create(&newUser)
 		if err == nil {
-			t.Error(errors.New("Expect error to be returned but got `nil`"))
+			t.Error(errors.New("Expect error when creating the same user twice"))
 		}
 
 		if got := newUser.ID; got != 0 {
 			t.Errorf("Expect User.ID to be 0 but got: %v", got)
-		}
-
-		if err := mock.ExpectationsWereMet(); err != nil {
-			t.Errorf("unfulfilled expectations: %s", err)
 		}
 	}) // t.Run("failed", ...)
 }

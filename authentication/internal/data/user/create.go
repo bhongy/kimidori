@@ -17,7 +17,7 @@ func (r repository) Create(u *User) error {
 			id
 	`
 	err := r.db.
-		QueryRowContext(ctx, q, u.UUID, u.Username, u.Password, u.CreatedAt).
+		QueryRow(ctx, q, u.UUID, u.Username, u.Password, u.CreatedAt).
 		Scan(&u.ID)
 	if err != nil {
 		return fmt.Errorf("create user: %v", err)
