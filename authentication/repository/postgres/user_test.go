@@ -67,7 +67,7 @@ func TestUserRepository_Create(t *testing.T) {
 		Password:  "stub_password",
 		CreatedAt: now,
 	}
-	err = repo.Create(in)
+	err = repo.Create(&in)
 	if err != nil {
 		t.Fatalf("repo.Create: %v", err)
 	}
