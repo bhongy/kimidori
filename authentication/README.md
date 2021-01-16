@@ -22,6 +22,9 @@ $ tern migrate -d 0
 # see current migration status
 $ tern status
 
-# applies all migrations for the test db
+# applies all migrations of the test db
 $ tern migrate -c tern-testdb.conf
+
+# see current migration status of the test db
+$ tern status -c tern-testdb.conf
 ```
