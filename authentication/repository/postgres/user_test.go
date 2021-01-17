@@ -60,7 +60,7 @@ func TestUserRepository_Create(t *testing.T) {
 	// Truncate since the time stored in DB has a lower precision
 	// otherwise `now` here and the value retrieves from the db later
 	// won't match
-	now := time.Now().Truncate(time.Microsecond)
+	now := time.Now().Truncate(time.Millisecond)
 
 	t.Run("success", func(t *testing.T) {
 		in := user.User{
@@ -70,7 +70,7 @@ func TestUserRepository_Create(t *testing.T) {
 			CreatedAt: now,
 		}
 
-		err = repo.Create(&in)
+		err = repo.Create(in)
 		if err != nil {
 			t.Fatalf("repo.Create: %v", err)
 		}
@@ -93,13 +93,13 @@ func TestUserRepository_Create(t *testing.T) {
 
 	t.Run("failure duplicate ID", func(t *testing.T) {
 		id := "stub_user_id"
-		repo.Create(&user.User{
+		repo.Create(user.User{
 			ID:        id,
 			Username:  "name1",
 			Password:  "pass1",
 			CreatedAt: now,
 		})
-		err := repo.Create(&user.User{
+		err := repo.Create(user.User{
 			ID:        id,
 			Username:  "name2",
 			Password:  "pass2",
@@ -112,21 +112,18 @@ func TestUserRepository_Create(t *testing.T) {
 
 	t.Run("failure duplicate username", func(t *testing.T) {
 		username := "stub_username"
-		repo.Create(&user.User{
+		repo.Create(user.User{
 			ID:        "id1",
 			Username:  username,
 			Password:  "pass1",
 			CreatedAt: now,
 		})
-		err := repo.Create(&user.User{
+		err := repo.Create(user.User{
 			ID:        "id2",
 			Username:  username,
 			Password:  "pass2",
 			CreatedAt: now,
 		})
-		if err != nil {
-			t.Error(err)
-		}
 		if err == nil {
 			t.Error("expect error but got <nil>")
 		}
