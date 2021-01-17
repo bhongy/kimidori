@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -33,4 +34,27 @@ func (repo *userRepository) Create(u user.User) error {
 		return fmt.Errorf("create user: %v", err)
 	}
 	return nil
+}
+
+func (repo *userRepository) FindByUsername(username string) (user.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var u user.User
+	q := `
+		SELECT id, username, password, created_at
+		FROM users
+		WHERE username = $1
+	`
+	err := repo.conn.
+		QueryRow(ctx, q, username).
+		Scan(&u.ID, &u.Username, &u.Password, &u.CreatedAt)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return u, user.ErrNotFound
+		}
+		return u, fmt.Errorf("find by username: %v", err)
+	}
+	return u, nil
 }

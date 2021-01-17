@@ -27,3 +27,11 @@ func (repo *userRepository) Create(u user.User) error {
 	repo.byUsername[u.Username] = u
 	return nil
 }
+
+func (repo *userRepository) FindByUsername(username string) (user.User, error) {
+	u, ok := repo.byUsername[username]
+	if !ok {
+		return u, user.ErrNotFound
+	}
+	return u, nil
+}

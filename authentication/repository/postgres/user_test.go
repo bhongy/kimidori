@@ -2,6 +2,7 @@ package postgres_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -126,6 +127,59 @@ func TestUserRepository_Create(t *testing.T) {
 		})
 		if err == nil {
 			t.Error("expect error but got <nil>")
+		}
+	})
+}
+
+func TestUserRepository_FindByUsername(t *testing.T) {
+	ctx := context.Background()
+	conn, err := testdb.Open()
+	defer conn.Close(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = deleteUsers(conn)
+	if err != nil {
+		log.Fatalf("deleteUsers: %v\n", err)
+	}
+
+	repo := postgres.NewUserRepository(conn)
+	// Truncate since the time stored in DB has a lower precision
+	// otherwise `now` here and the value retrieves from the db later
+	// won't match
+	now := time.Now().Truncate(time.Millisecond)
+	u := user.User{
+		ID:        "stub_id",
+		Username:  "stub_username",
+		Password:  "stub_password",
+		CreatedAt: now,
+	}
+	// seed with one user
+	err = repo.Create(u)
+	if err != nil {
+		log.Fatalf("create user: %v\n", err)
+	}
+
+	t.Run("success", func(t *testing.T) {
+		got, err := repo.FindByUsername(u.Username)
+		if err != nil {
+			t.Fatalf("expect no error but got: %v", err)
+		}
+		if diff := cmp.Diff(u, got); diff != "" {
+			t.Errorf("saved user mistmatch with input (-want +got):\n%s", diff)
+		}
+	})
+
+	t.Run("failure not found", func(t *testing.T) {
+		got, err := repo.FindByUsername("this-user-should-not-exist")
+
+		if !errors.Is(err, user.ErrNotFound) {
+			t.Errorf("expect error to be `user.ErrNotFound` but got: %v", err)
+		}
+
+		if got != (user.User{}) {
+			t.Errorf("expect empty User but got: %v", got)
 		}
 	})
 }

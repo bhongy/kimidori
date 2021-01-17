@@ -1,19 +1,24 @@
 package user
 
+import "errors"
+
+var (
+	ErrNotFound = errors.New("User not found")
+)
+
 // Repository provides an interface to the underlying data source
 // it exposes simple CRUD operations without business logic
 type Repository interface {
 	Create(u User) error
 
-	// Create
-	// GetByID
-	// GetByUsername
+	// FindByUsername returns User if found
+	// or ErrNotFound if not found
+	// otherwise returns all other error
+	FindByUsername(username string) (User, error)
 
 	// FindByID
-	// Store
-
 	// FindByUsernameAndPassword
-	// DoesEmailExist
+	// DoesUsernameExist
 
 	// Update
 	// ChangeUsername
