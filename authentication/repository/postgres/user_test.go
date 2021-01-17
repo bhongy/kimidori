@@ -34,6 +34,7 @@ func runMigrations() error {
 
 // deleteUsers deletes all rows in the users table from the database
 func deleteUsers(conn *pgx.Conn) error {
+	// cannot use TRUNCATE TABLE due to foreign key constraint
 	q := "DELETE from users"
 	_, err := conn.Exec(context.Background(), q)
 	if err != nil {
@@ -42,7 +43,6 @@ func deleteUsers(conn *pgx.Conn) error {
 	return nil
 }
 
-// TODO: test inserting to the ID already exists is an error
 func TestUserRepository_Create(t *testing.T) {
 	ctx := context.Background()
 	conn, err := testdb.Open()
@@ -61,29 +61,74 @@ func TestUserRepository_Create(t *testing.T) {
 	// otherwise `now` here and the value retrieves from the db later
 	// won't match
 	now := time.Now().Truncate(time.Microsecond)
-	in := user.User{
-		ID:        "stub_id",
-		Username:  "stub_username",
-		Password:  "stub_password",
-		CreatedAt: now,
-	}
-	err = repo.Create(&in)
-	if err != nil {
-		t.Fatalf("repo.Create: %v", err)
-	}
 
-	var out user.User
-	err = conn.
-		QueryRow(ctx, `
-			SELECT id, username, password, created_at
-			FROM users
-		`).
-		Scan(&out.ID, &out.Username, &out.Password, &out.CreatedAt)
-	if err != nil {
-		t.Fatalf("querying created user: %v", err)
-	}
+	t.Run("success", func(t *testing.T) {
+		in := user.User{
+			ID:        "stub_id",
+			Username:  "stub_username",
+			Password:  "stub_password",
+			CreatedAt: now,
+		}
 
-	if diff := cmp.Diff(in, out); diff != "" {
-		t.Errorf("Saved user mistmatch with input (-in +out):\n%s", diff)
-	}
+		err = repo.Create(&in)
+		if err != nil {
+			t.Fatalf("repo.Create: %v", err)
+		}
+
+		var out user.User
+		err = conn.
+			QueryRow(ctx, `
+				SELECT id, username, password, created_at
+				FROM users
+			`).
+			Scan(&out.ID, &out.Username, &out.Password, &out.CreatedAt)
+		if err != nil {
+			t.Fatalf("querying created user: %v", err)
+		}
+
+		if diff := cmp.Diff(in, out); diff != "" {
+			t.Errorf("Saved user mistmatch with input (-in +out):\n%s", diff)
+		}
+	})
+
+	t.Run("failure duplicate ID", func(t *testing.T) {
+		id := "stub_user_id"
+		repo.Create(&user.User{
+			ID:        id,
+			Username:  "name1",
+			Password:  "pass1",
+			CreatedAt: now,
+		})
+		err := repo.Create(&user.User{
+			ID:        id,
+			Username:  "name2",
+			Password:  "pass2",
+			CreatedAt: now,
+		})
+		if err == nil {
+			t.Error("expect error but got <nil>")
+		}
+	})
+
+	t.Run("failure duplicate username", func(t *testing.T) {
+		username := "stub_username"
+		repo.Create(&user.User{
+			ID:        "id1",
+			Username:  username,
+			Password:  "pass1",
+			CreatedAt: now,
+		})
+		err := repo.Create(&user.User{
+			ID:        "id2",
+			Username:  username,
+			Password:  "pass2",
+			CreatedAt: now,
+		})
+		if err != nil {
+			t.Error(err)
+		}
+		if err == nil {
+			t.Error("expect error but got <nil>")
+		}
+	})
 }
