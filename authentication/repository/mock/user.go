@@ -25,15 +25,16 @@ func (repo *userRepository) Create(u user.User) error {
 	if _, ok := repo.byID[u.ID]; ok {
 		return fmt.Errorf("ID (%s) already exists", u.ID)
 	}
-	repo.byID[u.ID] = &u
-	repo.byUsername[u.Username] = &u
+	p := &u
+	repo.byID[u.ID] = p
+	repo.byUsername[u.Username] = p
 	return nil
 }
 
 func (repo *userRepository) FindByUsername(username string) (user.User, error) {
-	u := repo.byUsername[username]
-	if u == nil {
+	p := repo.byUsername[username]
+	if p == nil {
 		return user.User{}, user.ErrNotFound
 	}
-	return *u, nil
+	return *p, nil
 }
