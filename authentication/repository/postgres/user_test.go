@@ -3,7 +3,6 @@ package postgres_test
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -33,15 +32,14 @@ func runMigrations() error {
 	return cmd.Run()
 }
 
-// deleteUsers deletes all rows in the users table from the database
-func deleteUsers(conn *pgx.Conn) error {
+// reset deletes all rows in the related table from the database
+func reset(conn *pgx.Conn) {
 	// cannot use TRUNCATE TABLE due to foreign key constraint
 	q := "DELETE from users"
 	_, err := conn.Exec(context.Background(), q)
 	if err != nil {
-		return fmt.Errorf("cannot exec users delete query: %v", err)
+		log.Fatalf("cannot exec users delete query: %v", err)
 	}
-	return nil
 }
 
 func TestUserRepository_Create(t *testing.T) {
@@ -50,11 +48,6 @@ func TestUserRepository_Create(t *testing.T) {
 	defer conn.Close(ctx)
 	if err != nil {
 		log.Fatalln(err)
-	}
-
-	err = deleteUsers(conn)
-	if err != nil {
-		log.Fatalf("deleteUsers: %v\n", err)
 	}
 
 	repo := postgres.NewUserRepository(conn)
@@ -70,8 +63,8 @@ func TestUserRepository_Create(t *testing.T) {
 			Password:  "stub_password",
 			CreatedAt: now,
 		}
-
 		err = repo.Create(in)
+		defer reset(conn)
 		if err != nil {
 			t.Fatalf("repo.Create: %v", err)
 		}
@@ -106,6 +99,7 @@ func TestUserRepository_Create(t *testing.T) {
 			Password:  "pass2",
 			CreatedAt: now,
 		})
+		defer reset(conn)
 		if err == nil {
 			t.Error("expect error but got <nil>")
 		}
@@ -119,6 +113,7 @@ func TestUserRepository_Create(t *testing.T) {
 			Password:  "pass1",
 			CreatedAt: now,
 		})
+		defer reset(conn)
 		err := repo.Create(user.User{
 			ID:        "id2",
 			Username:  username,
@@ -139,11 +134,6 @@ func TestUserRepository_FindByUsername(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	err = deleteUsers(conn)
-	if err != nil {
-		log.Fatalf("deleteUsers: %v\n", err)
-	}
-
 	repo := postgres.NewUserRepository(conn)
 	// Truncate since the time stored in DB has a lower precision
 	// otherwise `now` here and the value retrieves from the db later
@@ -157,6 +147,7 @@ func TestUserRepository_FindByUsername(t *testing.T) {
 	}
 	// seed with one user
 	err = repo.Create(u)
+	defer reset(conn)
 	if err != nil {
 		log.Fatalf("create user: %v\n", err)
 	}
@@ -173,11 +164,9 @@ func TestUserRepository_FindByUsername(t *testing.T) {
 
 	t.Run("failure not found", func(t *testing.T) {
 		got, err := repo.FindByUsername("this-user-should-not-exist")
-
 		if !errors.Is(err, user.ErrNotFound) {
 			t.Errorf("expect error to be `user.ErrNotFound` but got: %v", err)
 		}
-
 		if got != (user.User{}) {
 			t.Errorf("expect empty User but got: %v", got)
 		}
