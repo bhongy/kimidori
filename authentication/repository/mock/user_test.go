@@ -1,6 +1,7 @@
 package mock_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -10,9 +11,8 @@ import (
 )
 
 var (
-	repo user.Repository
-	now  = time.Now().Truncate(time.Millisecond)
-	u    = user.User{
+	now = time.Now().Truncate(time.Millisecond)
+	u   = user.User{
 		ID:        "fake_user_id",
 		Username:  "fake_username",
 		Password:  "fake_password",
@@ -20,49 +20,52 @@ var (
 	}
 )
 
-func setup(t *testing.T) {
-	repo = mock.NewUserRepository()
+func setup(t *testing.T) user.Repository {
+	repo := mock.NewUserRepository()
 	// always clear repo after each test scope finishes
 	// so it is difficult to have an accidental shared state
 	t.Cleanup(func() { repo = nil })
+	return repo
+}
+
+func testCreateFirstUserSuccess(t *testing.T, repo user.Repository) {
+	t.Helper()
+	err := repo.Create(u)
+	if err != nil {
+		// no point to perform other tests if this fails
+		t.Fatal("create user:", err)
+	}
 }
 
 func TestUserRepository_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		setup(t)
-		err := repo.Create(u)
-		if err != nil {
-			t.Fatal("create user: expect error to be <nil>")
-		}
+		repo := setup(t)
+		testCreateFirstUserSuccess(t, repo)
 	})
 
 	t.Run("failure duplicate ID", func(t *testing.T) {
-		setup(t)
-		// TODO: find a pattern to combine this test and the success test
-		err := repo.Create(u)
-		if err != nil {
-			t.Fatal("seeding first user:", err)
-		}
-		err = repo.Create(user.User{
+		repo := setup(t)
+		testCreateFirstUserSuccess(t, repo) // seed with the first user
+		err := repo.Create(user.User{
 			ID:        u.ID,
 			Username:  "doesntmatter",
 			Password:  "doesntmatter",
 			CreatedAt: now,
 		})
 		if err == nil {
-			t.Error("expect error but got <nil>")
+			t.Error("create user with duplicate ID: expect error but got <nil>")
 		}
 	})
 }
 
 func TestUserRepository_FindByUsername(t *testing.T) {
-	setup(t)
-	repo.Create(u)
+	repo := setup(t)
+	testCreateFirstUserSuccess(t, repo)
 
 	t.Run("found", func(t *testing.T) {
 		got, err := repo.FindByUsername(u.Username)
 		if err != nil {
-			t.Fatal("find user by username: expect error to be <nil>")
+			t.Error("find user:", err)
 		}
 		if diff := cmp.Diff(u, got); diff != "" {
 			t.Errorf("found user mistmatch (-want +got):\n%s", diff)
@@ -70,12 +73,12 @@ func TestUserRepository_FindByUsername(t *testing.T) {
 	})
 
 	t.Run("not found", func(t *testing.T) {
-		got, err := repo.FindByUsername("this-username-should-not-exist")
-		if err == nil {
-			t.Error("expect error but got <nil>")
+		got, err := repo.FindByUsername("this-user-should-not-exist")
+		if !errors.Is(err, user.ErrNotFound) {
+			t.Error("expect error to be `user.ErrNotFound` but got:", err)
 		}
 		if got != (user.User{}) {
-			t.Errorf("expect empty user but got: %+v", got)
+			t.Errorf("expect empty User but got: %+v", got)
 		}
 	})
 }
