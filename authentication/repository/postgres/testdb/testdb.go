@@ -1,6 +1,7 @@
 package testdb
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -19,4 +20,15 @@ func Open() (*pgx.Conn, error) {
 		os.Getenv("POSTGRES_TEST_DB"),
 	)
 	return db.NewConnection(dsn)
+}
+
+// Reset deletes all rows in the related table from the database
+func Reset(conn *pgx.Conn) error {
+	// cannot use TRUNCATE TABLE due to foreign key constraint
+	q := "DELETE from users"
+	_, err := conn.Exec(context.Background(), q)
+	if err != nil {
+		return fmt.Errorf("exec delete from users: %v", err)
+	}
+	return nil
 }

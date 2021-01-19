@@ -1,16 +1,14 @@
 package postgres_test
 
 import (
-	"context"
 	"errors"
-	"log"
 	"testing"
 	"time"
 
 	"github.com/bhongy/kimidori/authentication/repository/postgres"
+	"github.com/bhongy/kimidori/authentication/repository/postgres/testdb"
 	"github.com/bhongy/kimidori/authentication/user"
 	"github.com/google/go-cmp/cmp"
-	"github.com/jackc/pgx/v4"
 )
 
 var (
@@ -28,18 +26,13 @@ var (
 // setup creates a new instance of user.Repository
 // and ensure to "reset" db state after the current test scope (t) finishes
 func setup(t *testing.T) user.Repository {
-	t.Cleanup(func() { reset(conn) })
+	t.Cleanup(func() {
+		err := testdb.Reset(conn)
+		if err != nil {
+			t.Fatal("cleanup: testdb reset:", err)
+		}
+	})
 	return postgres.NewUserRepository(conn)
-}
-
-// reset deletes all rows in the related table from the database
-func reset(conn *pgx.Conn) {
-	// cannot use TRUNCATE TABLE due to foreign key constraint
-	q := "DELETE from users"
-	_, err := conn.Exec(context.Background(), q)
-	if err != nil {
-		log.Fatalf("cannot exec users delete query: %v", err)
-	}
 }
 
 func testCreateFirstUserSuccess(t *testing.T, repo user.Repository) {
