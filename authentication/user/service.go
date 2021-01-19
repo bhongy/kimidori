@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	ErrDuplicateID    = errors.New("Duplidate ID")
-	ErrUsernameExists = errors.New("Username already exists")
+	ErrDuplicateID    = errors.New("user: duplidate ID")
+	ErrUsernameExists = errors.New("user: username already exists")
 )
 
 // Service provides high-level functionality
@@ -66,7 +66,10 @@ func (svc *service) Signup(username, password string) (User, error) {
 	err = svc.userRepo.Create(u)
 
 	if err != nil {
-		return User{}, fmt.Errorf("userRepo.Create: %v", err)
+		return User{}, fmt.Errorf(
+			"userRepo.Create (username=%q, password=%q): %v",
+			username, password, err,
+		)
 	}
 	return u, nil
 }
