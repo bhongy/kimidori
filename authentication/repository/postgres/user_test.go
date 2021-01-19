@@ -4,32 +4,32 @@ import (
 	"context"
 	"errors"
 	"log"
-	"os"
-	"os/exec"
 	"testing"
 	"time"
 
 	"github.com/bhongy/kimidori/authentication/repository/postgres"
-	"github.com/bhongy/kimidori/authentication/repository/postgres/testdb"
 	"github.com/bhongy/kimidori/authentication/user"
 	"github.com/google/go-cmp/cmp"
 	"github.com/jackc/pgx/v4"
 )
 
-func TestMain(m *testing.M) {
-	err := runMigrations()
-	if err != nil {
-		log.Fatalf("run migrations: %v\n", err)
+var (
+	// call `.Truncate` since the time is stored in db with a lower precision
+	// otherwise the assertion will result in a mismatch (in microseconds).
+	now = time.Now().Truncate(time.Millisecond)
+	u   = user.User{
+		ID:        "test_id",
+		Username:  "test_username",
+		Password:  "test_password",
+		CreatedAt: now,
 	}
-	os.Exit(m.Run())
-}
+)
 
-func runMigrations() error {
-	cmd := exec.Command("tern", "migrate", "-c", "tern-testdb.conf")
-	// relative path to repository/postgres/migrations package
-	cmd.Dir = "./migrations"
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+// setup creates a new instance of user.Repository
+// and ensure to "reset" db state after the current test scope (t) finishes
+func setup(t *testing.T) user.Repository {
+	t.Cleanup(func() { reset(conn) })
+	return postgres.NewUserRepository(conn)
 }
 
 // reset deletes all rows in the related table from the database
@@ -42,133 +42,71 @@ func reset(conn *pgx.Conn) {
 	}
 }
 
-func TestUserRepository_Create(t *testing.T) {
-	ctx := context.Background()
-	conn, err := testdb.Open()
-	defer conn.Close(ctx)
+func testCreateFirstUserSuccess(t *testing.T, repo user.Repository) {
+	t.Helper()
+	err := repo.Create(u)
 	if err != nil {
-		log.Fatalln(err)
+		// no point to perform other tests if this fails
+		t.Fatal("create user:", err)
 	}
+}
 
-	repo := postgres.NewUserRepository(conn)
-	// Truncate since the time stored in DB has a lower precision
-	// otherwise `now` here and the value retrieves from the db later
-	// won't match
-	now := time.Now().Truncate(time.Millisecond)
-
+func TestUserRepository_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		in := user.User{
-			ID:        "stub_id",
-			Username:  "stub_username",
-			Password:  "stub_password",
-			CreatedAt: now,
-		}
-		err = repo.Create(in)
-		defer reset(conn)
-		if err != nil {
-			t.Fatalf("repo.Create: %v", err)
-		}
-
-		var out user.User
-		err = conn.
-			QueryRow(ctx, `
-				SELECT id, username, password, created_at
-				FROM users
-			`).
-			Scan(&out.ID, &out.Username, &out.Password, &out.CreatedAt)
-		if err != nil {
-			t.Fatalf("querying created user: %v", err)
-		}
-
-		if diff := cmp.Diff(in, out); diff != "" {
-			t.Errorf("Saved user mistmatch with input (-in +out):\n%s", diff)
-		}
+		repo := setup(t)
+		testCreateFirstUserSuccess(t, repo)
 	})
 
 	t.Run("failure duplicate ID", func(t *testing.T) {
-		id := "stub_user_id"
-		repo.Create(user.User{
-			ID:        id,
-			Username:  "name1",
-			Password:  "pass1",
-			CreatedAt: now,
-		})
+		repo := setup(t)
+		testCreateFirstUserSuccess(t, repo)
 		err := repo.Create(user.User{
-			ID:        id,
-			Username:  "name2",
-			Password:  "pass2",
+			ID:        u.ID,
+			Username:  "doesntmatter",
+			Password:  "doesntmatter",
 			CreatedAt: now,
 		})
-		defer reset(conn)
 		if err == nil {
-			t.Error("expect error but got <nil>")
+			t.Error("create user with duplicate ID: expect error but got <nil>")
 		}
 	})
 
 	t.Run("failure duplicate username", func(t *testing.T) {
-		username := "stub_username"
-		repo.Create(user.User{
-			ID:        "id1",
-			Username:  username,
-			Password:  "pass1",
-			CreatedAt: now,
-		})
-		defer reset(conn)
+		repo := setup(t)
+		testCreateFirstUserSuccess(t, repo)
 		err := repo.Create(user.User{
-			ID:        "id2",
-			Username:  username,
-			Password:  "pass2",
-			CreatedAt: now,
+			ID:        "fake_id_2",
+			Username:  u.Username,
+			Password:  "fake_password_2",
+			CreatedAt: time.Now(),
 		})
 		if err == nil {
-			t.Error("expect error but got <nil>")
+			t.Error("create user with duplicate username: expect error but got <nil>")
 		}
 	})
 }
 
 func TestUserRepository_FindByUsername(t *testing.T) {
-	ctx := context.Background()
-	conn, err := testdb.Open()
-	defer conn.Close(ctx)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	repo := setup(t)
+	repo.Create(u) // seed with one user
 
-	repo := postgres.NewUserRepository(conn)
-	// Truncate since the time stored in DB has a lower precision
-	// otherwise `now` here and the value retrieves from the db later
-	// won't match
-	now := time.Now().Truncate(time.Millisecond)
-	u := user.User{
-		ID:        "stub_id",
-		Username:  "stub_username",
-		Password:  "stub_password",
-		CreatedAt: now,
-	}
-	// seed with one user
-	err = repo.Create(u)
-	defer reset(conn)
-	if err != nil {
-		log.Fatalf("create user: %v\n", err)
-	}
-
-	t.Run("success", func(t *testing.T) {
+	t.Run("found", func(t *testing.T) {
 		got, err := repo.FindByUsername(u.Username)
 		if err != nil {
-			t.Fatalf("expect no error but got: %v", err)
+			t.Error("find user:", err)
 		}
 		if diff := cmp.Diff(u, got); diff != "" {
-			t.Errorf("saved user mistmatch with input (-want +got):\n%s", diff)
+			t.Errorf("found user mistmatch (-want +got):\n%s", diff)
 		}
 	})
 
-	t.Run("failure not found", func(t *testing.T) {
+	t.Run("not found", func(t *testing.T) {
 		got, err := repo.FindByUsername("this-user-should-not-exist")
 		if !errors.Is(err, user.ErrNotFound) {
-			t.Errorf("expect error to be `user.ErrNotFound` but got: %v", err)
+			t.Error("expect error to be `user.ErrNotFound` but got:", err)
 		}
 		if got != (user.User{}) {
-			t.Errorf("expect empty User but got: %v", got)
+			t.Errorf("expect empty User but got: %+v", got)
 		}
 	})
 }

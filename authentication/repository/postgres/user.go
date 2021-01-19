@@ -10,13 +10,14 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-// userRepository implements user.Repository interface
+// userRepository implements user.Repository interface.
 type userRepository struct {
 	conn *pgx.Conn
 }
 
-// userRepo := postgres.NewUserRepository(...)
-
+// NewUserRepository creates a new user.Repository using using postgres (pgx) driver.
+//
+//   userRepo := postgres.NewUserRepository(...)
 func NewUserRepository(conn *pgx.Conn) user.Repository {
 	return &userRepository{conn}
 }

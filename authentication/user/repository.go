@@ -3,7 +3,7 @@ package user
 import "errors"
 
 var (
-	ErrNotFound = errors.New("User not found")
+	ErrNotFound = errors.New("user: not found")
 )
 
 // Repository provides an interface to the underlying data source
