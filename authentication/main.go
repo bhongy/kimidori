@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bhongy/kimidori/authentication/internal/data/db"
-	"github.com/bhongy/kimidori/authentication/internal/data/user"
-	"github.com/google/uuid"
+	"github.com/bhongy/kimidori/authentication/repository/postgres"
+	"github.com/bhongy/kimidori/authentication/repository/postgres/db"
+	"github.com/bhongy/kimidori/authentication/user"
 )
 
 func main() {
-	db, err := db.New()
+	conn, err := db.Open()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -21,8 +21,9 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", index)
 
-	ur := user.NewRepository(db)
-	mux.Handle("/user", createUser{ur})
+	userRepo := postgres.NewUserRepository(conn)
+	userService := user.NewService(userRepo)
+	mux.Handle("/user", createUser{userService})
 
 	addr := "localhost:8081"
 	server := http.Server{
@@ -41,52 +42,37 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 type createUser struct {
-	userRepo user.Repository
+	userService user.Service
 }
 
 func (h createUser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+	if r.Method != http.MethodPost {
 		http.NotFound(w, r)
 		return
 	}
 
-	password, err := user.NewPassword("samui.seadog")
+	u, err := h.userService.Signup("bhongy", "samui.seadog")
 	if err != nil {
-		log.Printf("Error: %v\n", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	u := user.User{
-		UUID:      uuid.New(),
-		Username:  "bhongy",
-		Password:  password,
-		CreatedAt: time.Now(),
-	}
-	if err = h.userRepo.Create(&u); err != nil {
-		log.Printf("Error: %v\n", err)
+		log.Println("Error:", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	body, err := json.Marshal(struct {
-		ID        int       `json:"id"`
-		UUID      uuid.UUID `json:"uuid"`
+		ID        string    `json:"id"`
 		Username  string    `json:"username"`
 		CreatedAt time.Time `json:"createdAt"`
 	}{
-		u.ID, u.UUID, u.Username, u.CreatedAt,
+		u.ID, u.Username, u.CreatedAt,
 	})
 
 	if err != nil {
-		log.Printf("Error: encode body: %v\n", err)
+		log.Println("Error: encode body:", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	header := w.Header()
-	location := fmt.Sprintf("/user/%d", u.ID)
-	header.Set("Location", location)
 	header.Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(body)

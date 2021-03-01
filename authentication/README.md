@@ -11,7 +11,7 @@ It is in the foundation service layer and never to be hit by a public traffic (i
 ## Running database migration
 
 ```sh
-$ cd internal/data/db/migrations
+$ cd repository/db/migrations
 
 # applies all migrations
 $ tern migrate
