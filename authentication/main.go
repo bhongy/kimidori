@@ -1,12 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
+	"github.com/bhongy/kimidori/authentication/api"
 	"github.com/bhongy/kimidori/authentication/repository/postgres"
 	"github.com/bhongy/kimidori/authentication/repository/postgres/db"
 	"github.com/bhongy/kimidori/authentication/user"
@@ -23,7 +22,7 @@ func main() {
 
 	userRepo := postgres.NewUserRepository(conn)
 	userService := user.NewService(userRepo)
-	mux.Handle("/user", createUser{userService})
+	mux.Handle("/user/signup", api.UserSignup(userService))
 
 	addr := "localhost:8081"
 	server := http.Server{
@@ -39,41 +38,4 @@ func main() {
 
 func index(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello from authentication!"))
-}
-
-type createUser struct {
-	userService user.Service
-}
-
-func (h createUser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.NotFound(w, r)
-		return
-	}
-
-	u, err := h.userService.Signup("bhongy", "samui.seadog")
-	if err != nil {
-		log.Println("Error:", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	body, err := json.Marshal(struct {
-		ID        string    `json:"id"`
-		Username  string    `json:"username"`
-		CreatedAt time.Time `json:"createdAt"`
-	}{
-		u.ID, u.Username, u.CreatedAt,
-	})
-
-	if err != nil {
-		log.Println("Error: encode body:", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	header := w.Header()
-	header.Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(body)
 }
