@@ -43,6 +43,8 @@ func NewService(userRepo Repository) Service {
 func (svc *service) Signup(username, password string) (User, error) {
 	var err error
 
+	// TODO: validate username e.g. not empty, have a certain length
+
 	// cannot signup with a username that's already used by a user
 	_, err = svc.userRepo.FindByUsername(username)
 	switch {
