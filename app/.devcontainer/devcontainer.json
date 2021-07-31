@@ -1,0 +1,6 @@
+{
+  "name": "kimidori.${localWorkspaceFolderBasename}",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "${localWorkspaceFolderBasename}",
+  "workspaceFolder": "/kimidori/${localWorkspaceFolderBasename}",
+}

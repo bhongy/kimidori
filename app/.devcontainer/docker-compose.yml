@@ -1,0 +1,22 @@
+version: "3"
+
+networks:
+  devcontainer:
+    driver: bridge
+
+services:
+  app:
+    # cannot use alpine. we need git, etc in dev
+    image: node:16.6
+    volumes:
+      # we need to mount at the root so `.git` is included
+      - ../../:/kimidori/:cached
+      # persist node_modules on container rebuilds
+      - node_modules:/kimidori/app/node_modules/:cached
+    networks:
+      - devcontainer
+    stdin_open: true
+    tty: true
+
+volumes:
+  node_modules:
