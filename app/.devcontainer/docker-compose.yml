@@ -13,6 +13,10 @@ services:
       - ../../:/kimidori/:cached
       # persist node_modules on container rebuilds
       - node_modules:/kimidori/app/node_modules/:cached
+      # parcel cache
+      - parcel-cache:/kimidori/app/.parcel-cache/:cached
+      # parcel build output folder
+      - dist:/kimidori/app/dist/:cached
     networks:
       - devcontainer
     stdin_open: true
@@ -20,3 +24,5 @@ services:
 
 volumes:
   node_modules:
+  parcel-cache:
+  dist:
