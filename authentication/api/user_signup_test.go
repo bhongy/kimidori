@@ -25,7 +25,7 @@ func TestUserSignup(t *testing.T) {
 	u := user.User{
 		ID:        "fake.id",
 		Username:  "fake.username",
-		CreatedAt: time.Now(),
+		CreatedAt: user.NewTimestamp(time.Now()),
 	}
 
 	body, err := json.Marshal(api.UserSignupRequest{
@@ -57,7 +57,7 @@ func TestUserSignup(t *testing.T) {
 		`{"id":"%v","username":"%v","createdAt":"%v"}`,
 		u.ID,
 		u.Username,
-		u.CreatedAt.Format(time.RFC3339Nano),
+		u.CreatedAt.String(),
 	)
 	if body := recorder.Body.String(); body != expectedBody {
 		t.Errorf("handler returned unexpected body: got %v want %v",

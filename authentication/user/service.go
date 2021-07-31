@@ -59,11 +59,12 @@ func (svc *service) Signup(username, password string) (User, error) {
 		return User{}, fmt.Errorf("hash password: %v", err)
 	}
 
+	timestamp := NewTimestamp(time.Now())
 	u := User{
 		ID:        ksuid.New().String(),
 		Username:  username,
 		Password:  p,
-		CreatedAt: time.Now().Truncate(time.Millisecond),
+		CreatedAt: timestamp,
 	}
 	err = svc.userRepo.Create(u)
 

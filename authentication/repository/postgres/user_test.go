@@ -14,7 +14,7 @@ import (
 var (
 	// call `.Truncate` since the time is stored in db with a lower precision
 	// otherwise the assertion will result in a mismatch (in microseconds).
-	now = time.Now().Truncate(time.Millisecond)
+	now = user.NewTimestamp(time.Now())
 	u   = user.User{
 		ID:        "test_id",
 		Username:  "test_username",
@@ -71,7 +71,7 @@ func TestUserRepository_Create(t *testing.T) {
 			ID:        "fake_id_2",
 			Username:  u.Username,
 			Password:  "fake_password_2",
-			CreatedAt: time.Now(),
+			CreatedAt: user.NewTimestamp(time.Now()),
 		})
 		if err == nil {
 			t.Error("create user with duplicate username: expect error but got <nil>")

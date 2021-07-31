@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	now = time.Now().Truncate(time.Millisecond)
+	now = user.NewTimestamp(time.Now())
 	u   = user.User{
 		ID:        "fake_user_id",
 		Username:  "fake_username",

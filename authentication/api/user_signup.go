@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/bhongy/kimidori/authentication/user"
 )
@@ -20,9 +19,9 @@ type UserSignupRequest struct {
 }
 
 type UserSignupResponse struct {
-	ID        string    `json:"id"`
-	Username  string    `json:"username"`
-	CreatedAt time.Time `json:"createdAt"`
+	ID        string `json:"id"`
+	Username  string `json:"username"`
+	CreatedAt string `json:"createdAt"`
 }
 
 type userSignupHandler struct {
@@ -31,7 +30,9 @@ type userSignupHandler struct {
 
 func (h *userSignupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.NotFound(w, r)
+		w.Header().Set("Allow", "POST")
+		code := http.StatusMethodNotAllowed
+		http.Error(w, http.StatusText(code), code)
 		return
 	}
 
@@ -64,7 +65,7 @@ func (h *userSignupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	body, err := json.Marshal(UserSignupResponse{
 		ID:        u.ID,
 		Username:  u.Username,
-		CreatedAt: u.CreatedAt,
+		CreatedAt: u.CreatedAt.String(),
 	})
 
 	if err != nil {
