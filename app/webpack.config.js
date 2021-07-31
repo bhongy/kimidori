@@ -1,3 +1,5 @@
+'use strict';
+
 const path = require('path');
 
 module.exports = {
@@ -5,7 +7,12 @@ module.exports = {
   output: {
     filename: '[name].js',
     chunkFilename: '[id].chunk.js',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'dist/statics'),
+    // webpack-dev-middleware uses this to filter requests for webpack assets
+    // the idea is:
+    //   - files emit to `dist/statics` in fs
+    //   - request hit server for path `/statics/asset-name.ext`
+    publicPath: '/statics',
   },
   module: {
     rules: [
