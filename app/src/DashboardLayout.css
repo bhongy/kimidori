@@ -1,0 +1,15 @@
+.DashboardLayout_Root {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.DashboardLayout_SidebarContainer {
+  flex-shrink: 0;
+  overflow-x: hidden;
+}
+
+.DashboardLayout_MainContainer {
+  flex-grow: 1;
+}
