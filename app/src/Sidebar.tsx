@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {BlockButton} from './Components/Button';
 import './Sidebar.css';
 
 // Sidebar is a placeholder used temporarily to check
@@ -14,30 +15,31 @@ export function Sidebar(): React.ReactElement {
 
 function Nav(): React.ReactElement {
   return (
-    <div className="Sidebar_Nav">
+    <nav className="Sidebar_Nav" role="navigation">
       <div style={{height: '120vh'}}>
-        <ul>
-          <li style={{width: '300px'}}>Home</li>
-          <li>Profile</li>
-          <li>Investment</li>
-        </ul>
+        <Menu>
+          <MenuItem>Home</MenuItem>
+          <MenuItem>Profile</MenuItem>
+          <MenuItem>Investment</MenuItem>
+          <MenuItem>Settings</MenuItem>
+        </Menu>
       </div>
-    </div>
+    </nav>
   );
 }
 
 function Footer(): React.ReactElement {
   return (
-    <div className="Sidebar_Footer">
+    <footer className="Sidebar_Footer">
       <MenuItem>Sidebar Footer</MenuItem>
-    </div>
+    </footer>
   );
 }
 
-function MenuItem({
-  children,
-}: {
-  children: string | React.ReactElement;
-}): React.ReactElement {
-  return <a className="Sidebar_MenuItem">{children}</a>;
+function Menu({children}: {children: React.ReactNode}): React.ReactElement {
+  return <div className="Sidebar_Menu">{children}</div>;
+}
+
+function MenuItem({children}: {children: React.ReactNode}): React.ReactElement {
+  return <BlockButton className="Sidebar_MenuItem">{children}</BlockButton>;
 }

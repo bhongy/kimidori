@@ -1,0 +1,22 @@
+.BaseButton {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  background-color: transparent;
+  border-radius: 0;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  margin: 0;
+  outline: 0;
+  padding: 0;
+  text-decoration: none;
+  user-select: none;
+  vertical-align: middle;
+}
+
+.BlockButton {
+  align-items: center;
+  display: flex;
+  width: 100%;
+}
