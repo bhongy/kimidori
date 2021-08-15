@@ -1,16 +1,16 @@
 import * as React from 'react';
 import {DashboardLayout} from './DashboardLayout';
-import {Navigation, navigate} from './Navigation';
+import {BrowserNavigationProvider} from './Navigation';
 import {Sidebar} from './Sidebar';
 import './App.css';
 
 export function App(): React.ReactElement {
   return (
-    <Navigation.Provider value={navigate.browser}>
+    <BrowserNavigationProvider>
       <DashboardLayout sidebar={<Sidebar />}>
         <MainPlaceholder />
       </DashboardLayout>
-    </Navigation.Provider>
+    </BrowserNavigationProvider>
   );
 }
 

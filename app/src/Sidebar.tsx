@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {Navigation} from './Navigation';
 import {BlockButton} from './Components/Button';
+import {useNavigation} from './Navigation';
 import './Sidebar.css';
 
 // Sidebar is a placeholder used temporarily to check
@@ -48,7 +48,7 @@ function MenuItem({
   children: React.ReactNode;
   href?: string;
 }): React.ReactElement {
-  const navigate = React.useContext(Navigation);
+  const navigate = useNavigation();
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     href && navigate(href);
