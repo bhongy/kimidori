@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Navigation} from './Navigation';
 import {BlockButton} from './Components/Button';
 import './Sidebar.css';
 
@@ -18,10 +19,10 @@ function Nav(): React.ReactElement {
     <nav className="Sidebar_Nav" role="navigation">
       <div style={{height: '120vh'}}>
         <Menu>
-          <MenuItem>Home</MenuItem>
-          <MenuItem>Profile</MenuItem>
-          <MenuItem>Investment</MenuItem>
-          <MenuItem>Settings</MenuItem>
+          <MenuItem href="/">Home</MenuItem>
+          <MenuItem href="/profile">Profile</MenuItem>
+          <MenuItem href="/investment">Investment</MenuItem>
+          <MenuItem href="/settings">Settings</MenuItem>
         </Menu>
       </div>
     </nav>
@@ -40,6 +41,21 @@ function Menu({children}: {children: React.ReactNode}): React.ReactElement {
   return <div className="Sidebar_Menu">{children}</div>;
 }
 
-function MenuItem({children}: {children: React.ReactNode}): React.ReactElement {
-  return <BlockButton className="Sidebar_MenuItem">{children}</BlockButton>;
+function MenuItem({
+  children,
+  href,
+}: {
+  children: React.ReactNode;
+  href?: string;
+}): React.ReactElement {
+  const navigate = React.useContext(Navigation);
+  const handleClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    href && navigate(href);
+  };
+  return (
+    <BlockButton className="Sidebar_MenuItem" onClick={handleClick}>
+      {children}
+    </BlockButton>
+  );
 }
