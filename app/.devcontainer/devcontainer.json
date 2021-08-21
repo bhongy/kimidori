@@ -4,5 +4,4 @@
   "service": "${localWorkspaceFolderBasename}",
   "workspaceFolder": "/kimidori/${localWorkspaceFolderBasename}",
   "extensions": ["editorconfig.editorconfig", "esbenp.prettier-vscode"],
-  "postStartCommand": ["yarn", "start"]
 }

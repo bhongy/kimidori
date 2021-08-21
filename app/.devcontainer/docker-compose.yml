@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 networks:
   devcontainer:
@@ -10,13 +10,13 @@ services:
     image: node:16.6
     volumes:
       # we need to mount at the root so `.git` is included
-      - ../../:/kimidori/:cached
+      - ../../:/kimidori
       # persist node_modules on container rebuilds
-      - node_modules:/kimidori/app/node_modules/:cached
+      - node_modules:/kimidori/app/node_modules
       # parcel cache
-      - parcel-cache:/kimidori/app/.parcel-cache/:cached
+      - parcel-cache:/kimidori/app/.parcel-cache
       # parcel build output folder
-      - dist:/kimidori/app/dist/:cached
+      - dist:/kimidori/app/dist
     networks:
       - devcontainer
     stdin_open: true
