@@ -3,14 +3,7 @@ body {
   font-family: 'Roboto', Helvetica, Arial, sans-serif;
 }
 
-.Main_Root {
+.Main {
   height: 100%;
-}
-
-.Main_Container {
-  padding: 2.5rem 4rem;
-}
-
-.App_Title {
-  background-color: gainsboro;
+  width: 100%;
 }

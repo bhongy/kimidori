@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {BlockButton} from './Components/Button';
-import {useNavigation} from './Navigation';
+import {useHistory} from './History';
 import './Sidebar.css';
 
 // Sidebar is a placeholder used temporarily to check
@@ -48,10 +48,10 @@ function MenuItem({
   children: React.ReactNode;
   href?: string;
 }): React.ReactElement {
-  const navigate = useNavigation();
+const history = useHistory();
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
-    href && navigate(href);
+    href && history.push(href);
   };
   return (
     <BlockButton className="Sidebar_MenuItem" onClick={handleClick}>

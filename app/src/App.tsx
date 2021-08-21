@@ -1,25 +1,37 @@
 import * as React from 'react';
 import {DashboardLayout} from './DashboardLayout';
-import {BrowserNavigationProvider} from './Navigation';
+import {HistoryContextProvider, BrowserHistory} from './History';
 import {Sidebar} from './Sidebar';
 import './App.css';
 
+function onPathChange(path: string): void {
+  console.log(`path: ${path}`);
+}
+
 export function App(): React.ReactElement {
+  const history = new BrowserHistory();
+  React.useEffect(() => {
+    history.listen(onPathChange);
+    return () => history.unlisten(onPathChange)
+  })
   return (
-    <BrowserNavigationProvider>
+    <HistoryContextProvider history={history}>
       <DashboardLayout sidebar={<Sidebar />}>
         <MainPlaceholder />
       </DashboardLayout>
-    </BrowserNavigationProvider>
+    </HistoryContextProvider>
   );
 }
 
 function MainPlaceholder(): React.ReactElement {
+  const page = 'https://thanik.me';
   return (
-    <section className="Main_Root">
-      <div className="Main_Container">
-        <h1 className="App_Title">App</h1>
-      </div>
-    </section>
+    <iframe
+      allow="clipboard-write"
+      className="Main"
+      frameBorder="0"
+      sandbox=""
+      src={page}
+    ></iframe>
   );
 }
