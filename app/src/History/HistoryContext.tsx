@@ -1,5 +1,6 @@
 import * as React from 'react';
-import {History, NoopHistory} from './History';
+import {History} from './History';
+import {NoopHistory} from './NoopHistory';
 
 const defaultHistory = new NoopHistory();
 const HistoryContext = React.createContext<History>(defaultHistory);

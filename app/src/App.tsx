@@ -1,19 +1,12 @@
 import * as React from 'react';
 import {DashboardLayout} from './DashboardLayout';
-import {HistoryContextProvider, BrowserHistory} from './History';
+import {HistoryContextProvider, BrowserHistory, useHistory} from './History';
 import {Sidebar} from './Sidebar';
 import './App.css';
 
-function onPathChange(path: string): void {
-  console.log(`path: ${path}`);
-}
+const history = new BrowserHistory();
 
 export function App(): React.ReactElement {
-  const history = new BrowserHistory();
-  React.useEffect(() => {
-    history.listen(onPathChange);
-    return () => history.unlisten(onPathChange)
-  })
   return (
     <HistoryContextProvider history={history}>
       <DashboardLayout sidebar={<Sidebar />}>
@@ -24,7 +17,8 @@ export function App(): React.ReactElement {
 }
 
 function MainPlaceholder(): React.ReactElement {
-  const page = 'https://thanik.me';
+  const location = useLocation();
+  const page = location === '/profile' ? 'https://thanik.me' : 'about:blank';
   return (
     <iframe
       allow="clipboard-write"
@@ -34,4 +28,14 @@ function MainPlaceholder(): React.ReactElement {
       src={page}
     ></iframe>
   );
+}
+
+function useLocation(): string {
+  const [location, setLocation] = React.useState(window.location.pathname);
+  const history = useHistory();
+  React.useEffect(() => {
+    const unlisten = history.listen(({to}) => setLocation(to));
+    return unlisten;
+  }, []);
+  return location;
 }
