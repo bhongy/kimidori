@@ -1,0 +1,25 @@
+version: '3'
+
+networks:
+  devcontainer:
+    driver: bridge
+
+services:
+  profile:
+    # cannot use alpine. we need git, etc in dev
+    image: node:16.6
+    volumes:
+      # we need to mount at the root so `.git` is included
+      - ../../:/kimidori
+      # persist node_modules on container rebuilds
+      - node_modules:/kimidori/profile/node_modules
+      # parcel build output folder
+      - dist:/kimidori/profile/dist
+    networks:
+      - devcontainer
+    stdin_open: true
+    tty: true
+
+volumes:
+  node_modules:
+  dist:

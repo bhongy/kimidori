@@ -1,0 +1,7 @@
+{
+  "name": "kimidori.${localWorkspaceFolderBasename}",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "${localWorkspaceFolderBasename}",
+  "workspaceFolder": "/kimidori/${localWorkspaceFolderBasename}",
+  "extensions": ["editorconfig.editorconfig", "esbenp.prettier-vscode"],
+}
