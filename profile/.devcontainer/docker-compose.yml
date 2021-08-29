@@ -13,6 +13,8 @@ services:
       - ../../:/kimidori
       # persist node_modules on container rebuilds
       - node_modules:/kimidori/profile/node_modules
+      # parcel cache
+      - parcel-cache:/kimidori/profile/.parcel-cache
       # parcel build output folder
       - dist:/kimidori/profile/dist
     networks:
@@ -22,4 +24,5 @@ services:
 
 volumes:
   node_modules:
+  parcel-cache:
   dist:

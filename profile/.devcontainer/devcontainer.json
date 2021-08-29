@@ -4,4 +4,5 @@
   "service": "${localWorkspaceFolderBasename}",
   "workspaceFolder": "/kimidori/${localWorkspaceFolderBasename}",
   "extensions": ["editorconfig.editorconfig", "esbenp.prettier-vscode"],
+  "forwardPorts": [8001],
 }

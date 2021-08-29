@@ -2,6 +2,8 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules"],
   "compilerOptions": {
+    "noEmit": true,
+    "isolatedModules": true,
     "baseUrl": "./",
     "outDir": "dist",
     "jsx": "react",

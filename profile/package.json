@@ -4,6 +4,9 @@
   "repository": "https://github.com/bhongy/kimidori/profile",
   "author": "Thanik Bhongbhibhat <email@thanik.me>",
   "license": "MIT",
+  "scripts": {
+    "start": "parcel serve './src/index.html' --port 8001 --lazy"
+  },
   "dependencies": {
     "clsx": "1.1.1",
     "react": "17.0.2",
@@ -12,6 +15,7 @@
   "devDependencies": {
     "@types/react": "17.0.15",
     "@types/react-dom": "17.0.9",
+    "parcel": "2.0.0-beta.3.1",
     "prettier": "2.3.2",
     "typescript": "4.3.5"
   }
