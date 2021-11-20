@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  simple-nginx:
+    image: nginx:1.21.4-alpine
+    volumes:
+    - ./html:/usr/share/nginx/html
+    ports:
+    # maps localhost:8040 -> container port 80
+    - "8040:80"
