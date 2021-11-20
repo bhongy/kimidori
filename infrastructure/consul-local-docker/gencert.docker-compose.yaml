@@ -1,0 +1,20 @@
+# Generate TLS certificates for consul server
+#
+# docker-compose -f gencert.docker-compose.yaml run --rm ca
+# docker-compose -f gencert.docker-compose.yaml run --rm server
+
+version: "3.7"
+services:
+  __common: &common
+    image: consul:1.10.3
+    working_dir: /out
+    volumes:
+    - ./secrets/certs:/out
+  ca:
+    <<: *common
+    command: tls ca create
+    # command: "tls ca create -domain='kimidori.local'"
+  server:
+    <<: *common
+    command: tls cert create -server
+    # command: "tls cert create -server -dc='kimidori.local' -domain='kimidori.local'"

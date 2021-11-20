@@ -52,3 +52,10 @@ curl example-svc
 kubectl apply -f testcurl.dev.yaml
 kubectl exec -it testcurl -- sh
 ```
+
+```sh
+docker kill --signal=HUP <container_id>
+
+curl -H "Authorization: Bearer <ACL_SecretID>" \
+  http://127.0.0.1:8500/v1/agent/members
+```

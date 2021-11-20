@@ -1,0 +1,25 @@
+version: "3"
+services:
+  app:
+    image: nginx:1.21.4-alpine
+    volumes:
+    - ./html:/usr/share/nginx/html
+    ports:
+    # maps localhost:8040 -> container port 80
+    - "8040:80"
+  consul-client:
+    depends_on: [consul-server]
+    image: consul:1.10.3
+    command: agent
+    networks:
+    - kimidori.local
+    volumes:
+    - ./config/consul-client.json:/consul/config/client.json:ro
+    - ./config/service.json:/consul/config/service.json:ro
+    - ../../secrets/certs:/consul/config/certs:ro
+    restart: always
+
+networks:
+  kimidori.local:
+    name: kimidori.local
+    driver: bridge
