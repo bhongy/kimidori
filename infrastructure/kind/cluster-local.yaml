@@ -1,0 +1,21 @@
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+name: kimidori.local
+
+nodes:
+- role: control-plane
+  # TEMPORARY, allow hitting the cluster from local machine via http://localhost:8020
+  # extraPortMappings:
+  # - containerPort: 8020
+  #   hostPort: 8020
+  #   protocol: TCP
+- role: worker
+  extraPortMappings:
+  - containerPort: 8020
+    hostPort: 8020
+    protocol: TCP
+  extraMounts:
+  - hostPath: ./html
+    containerPath: /root/simple-nginx/html
+# - role: worker
+# - role: worker
