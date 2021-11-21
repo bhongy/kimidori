@@ -33,6 +33,8 @@ kind get clusters
 kind delete cluster --name kimidori.local
 ```
 
+There's an issue with the worker node bind mount on macOS. Need to uncheck "Use gRPC FUSE for file sharing" option in Docker Desktop.
+
 ... A context element in a kubeconfig file is used to group access parameters under a convenient name. Each context has three parameters: cluster, namespace, and user. [k8s Doc: Context](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#context)
 ... A kubeconfig file will be created at `$HOME/.kube/config`.
 
