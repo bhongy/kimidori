@@ -61,3 +61,28 @@ docker kill --signal=HUP <container_id>
 curl -H "Authorization: Bearer <ACL_SecretID>" \
   http://127.0.0.1:8500/v1/agent/members
 ```
+
+## Notes: Edge Ingress (local)
+
+Edge Ingress (local) service manages the public traffic (internet to the cluster) when using the local (on laptop) cluster.
+
+https://www.thoughtworks.com/en-us/insights/blog/building-service-mesh-envoy-0
+
+https://github.com/turbinelabs/examples/tree/master/local-dev-kubernetes
+https://github.com/turbinelabs/examples/blob/master/telepresence-houston/README.md
+https://learn.hashicorp.com/tutorials/consul/kubernetes-kind
+
+- connectivity: service discovery, load balancing
+- communication resiliency: retries, timeouts, circuit breaking, and rate limiting
+- security: mTLS
+- observability
+
+edge-ingress-dashboard: web ui to manage configuration
+
+The virtual router has one or more virtual routes that adhere to the traffic policies and retry policies. (router can delegate to another router)
+
+profile.app.local
+profile.data.local
+OR
+profile.srv.local
+profile.srv.local/api
