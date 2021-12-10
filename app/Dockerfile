@@ -7,10 +7,5 @@ RUN yarn
 COPY src/ ./src/
 RUN yarn build
 
-FROM node:16.6-alpine
-WORKDIR /app/
-
-COPY serve-static.js ./
-COPY --from=builder /app/dist/ ./dist/
-
-# CMD ["node", "./serve-static.js"]
+FROM nginx:1.21.4-alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
