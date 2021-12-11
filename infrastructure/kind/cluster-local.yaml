@@ -24,7 +24,7 @@ nodes:
     hostPort: 8020
     protocol: TCP
   extraMounts:
-  - hostPath: ./html
-    containerPath: /root/simple-nginx/html
+  - hostPath: ../..
+    containerPath: /root/kimidori
 # - role: worker
 # - role: worker

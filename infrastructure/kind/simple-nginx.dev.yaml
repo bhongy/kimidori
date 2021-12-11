@@ -33,4 +33,4 @@ spec:
     hostPath:
       type: Directory
       # directory location on host
-      path: /root/simple-nginx/html
+      path: /root/kimidori/infrastructure/kind/html
