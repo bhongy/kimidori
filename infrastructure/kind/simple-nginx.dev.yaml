@@ -19,18 +19,15 @@ metadata:
     app: *name
 spec:
   containers:
-  - name: *name
-    image: nginx:1.21.4-alpine
-    resources:
-      limits:
-        cpu: "30m"
-        memory: "30Mi"
-    volumeMounts:
-    - name: html
-      mountPath: /usr/share/nginx/html
+    - name: *name
+      # image: nginx:1.21.4-alpine
+      image: nginx:1.21.4
+      volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
   volumes:
-  - name: html
-    hostPath:
-      type: Directory
-      # directory location on host
-      path: /root/kimidori/infrastructure/kind/html
+    - name: html
+      hostPath:
+        type: Directory
+        # directory location on host
+        path: /root/kimidori/infrastructure/kind/html

@@ -13,6 +13,24 @@ spec:
             path: /
             backend:
               service:
-                name: app
+                name: simple-nginx
                 port:
                   number: 80
+    # - http:
+    #     paths:
+    #     - pathType: Prefix
+    #       path: /apis
+    #       backend:
+    #         service:
+    #           name: app-api
+    #           port:
+    #             number: 80
+    # - http:
+    #     paths:
+    #     - pathType: Prefix
+    #       path: /go
+    #       backend:
+    #         service:
+    #           name: go-devcontainer
+    #           port:
+    #             number: 8080

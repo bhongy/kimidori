@@ -33,13 +33,7 @@ kind get clusters
 kind delete cluster --name kimidori.local
 ```
 
-There's an issue with the worker node bind mount on macOS. Need to uncheck "Use gRPC FUSE for file sharing" option in Docker Desktop.
-
-... A context element in a kubeconfig file is used to group access parameters under a convenient name. Each context has three parameters: cluster, namespace, and user. [k8s Doc: Context](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#context)
-... A kubeconfig file will be created at `$HOME/.kube/config`.
-
-Q: Why using Consul instead of just Envoy
-A: Consul provides service discovery, mTLS, and access control (intention). Since we use Consul for the production service mesh, this allows us to treat the local cluster as another cluster in the mesh.
+> There's an issue with the worker node bind mount on macOS. Need to uncheck "Use gRPC FUSE for file sharing" option in Docker Desktop.
 
 TEMPORARY
 
@@ -61,6 +55,20 @@ docker kill --signal=HUP <container_id>
 curl -H "Authorization: Bearer <ACL_SecretID>" \
   http://127.0.0.1:8500/v1/agent/members
 ```
+
+```sh
+kubectl create secret generic ssh-key-secret --from-file=ssh-privatekey=/path/to/.ssh/id_rsa --from-file=ssh-publickey=/path/to/.ssh/id_rsa.pub
+
+kubectl create secret generic ssh-key-secret \
+  --from-file=ssh-privatekey="../secrets/kimidori.local" \
+  --from-file=ssh-publickey="../secrets/kimidori.local.pub"
+```
+
+... A context element in a kubeconfig file is used to group access parameters under a convenient name. Each context has three parameters: cluster, namespace, and user. [k8s Doc: Context](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#context)
+... A kubeconfig file will be created at `$HOME/.kube/config`.
+
+Q: Why using Consul instead of just Envoy
+A: Consul provides service discovery, mTLS, and access control (intention). Since we use Consul for the production service mesh, this allows us to treat the local cluster as another cluster in the mesh.
 
 ## Notes: Edge Ingress (local)
 
