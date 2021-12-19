@@ -1,13 +1,14 @@
 version: '3'
 
 networks:
-  devcontainer:
-    driver: bridge
+  default:
+    external: true
+    name: kimidori-devcontainer
 
 services:
   app:
     # cannot use alpine. we need git, etc in dev
-    image: node:16.6
+    image: node:16.13.1-bullseye
     volumes:
       # we need to mount at the root so `.git` is included
       - ../../:/kimidori
@@ -17,8 +18,6 @@ services:
       - parcel-cache:/kimidori/app/.parcel-cache
       # parcel build output folder
       - dist:/kimidori/app/dist
-    networks:
-      - devcontainer
     stdin_open: true
     tty: true
 
