@@ -6,6 +6,5 @@
   "extensions": [
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode"
-  ],
-  "remoteUser": "node"
+  ]
 }
