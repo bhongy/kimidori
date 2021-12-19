@@ -1,0 +1,34 @@
+version: "3"
+services:
+  app:
+    image: nginx:1.21.4-alpine
+    volumes:
+    - ./html:/usr/share/nginx/html
+    # ports:
+    # maps localhost:8040 -> container port 80
+    # - "8040:80"
+  consul-agent:
+    image: consul:1.10.3
+    command: agent -config-dir=/etc/consul.d
+    networks:
+    - kimidori.local
+    volumes:
+    - ./config:/etc/consul.d:ro
+    secrets:
+    - consul-agent-ca
+    - consul-server-cert
+    - consul-server-cert-key
+    restart: always
+
+secrets:
+  consul-agent-ca:
+    file: ../../secrets/consul-agent-ca.pem
+  consul-server-cert:
+    file: ../../secrets/dc1-server-consul-0.pem
+  consul-server-cert-key:
+    file: ../../secrets/dc1-server-consul-0-key.pem
+
+networks:
+  kimidori.local:
+    name: kimidori.local
+    driver: bridge

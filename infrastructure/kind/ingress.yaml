@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kimidori-local
+spec:
+  ingressClassName: nginx
+  rules:
+    # - host: kimidori.localdev.me
+    #   http:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: simple-nginx
+                port:
+                  number: 80
+    # - http:
+    #     paths:
+    #     - pathType: Prefix
+    #       path: /apis
+    #       backend:
+    #         service:
+    #           name: app-api
+    #           port:
+    #             number: 80
+    # - http:
+    #     paths:
+    #     - pathType: Prefix
+    #       path: /go
+    #       backend:
+    #         service:
+    #           name: go-devcontainer
+    #           port:
+    #             number: 8080

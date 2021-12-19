@@ -1,0 +1,32 @@
+version: '3'
+services:
+  agent:
+    image: consul:1.10.3
+    hostname: kimidori-local-consul-server
+    command: agent -config-dir=/etc/consul.d
+    volumes:
+    - ./config:/etc/consul.d:ro
+    secrets:
+    - consul-agent-ca
+    - consul-server-cert
+    - consul-server-cert-key
+    networks:
+    - kimidori.local
+    ports:
+    - '8500:8500'
+    - '8600:8600/tcp'
+    - '8600:8600/udp'
+    restart: always
+
+secrets:
+  consul-agent-ca:
+    file: ../secrets/consul-agent-ca.pem
+  consul-server-cert:
+    file: ../secrets/dc1-server-consul-0.pem
+  consul-server-cert-key:
+    file: ../secrets/dc1-server-consul-0-key.pem
+
+networks:
+  kimidori.local:
+    name: kimidori.local
+    driver: bridge
