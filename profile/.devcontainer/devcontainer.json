@@ -1,8 +1,13 @@
 {
   "name": "kimidori.${localWorkspaceFolderBasename}",
   "dockerComposeFile": "docker-compose.yml",
-  "service": "${localWorkspaceFolderBasename}",
+  "service": "profile",
   "workspaceFolder": "/kimidori/${localWorkspaceFolderBasename}",
-  "extensions": ["editorconfig.editorconfig", "esbenp.prettier-vscode"],
-  "forwardPorts": [8001],
+  "settings": {
+    "remote.autoForwardPorts": false
+  },
+  "extensions": [
+    "editorconfig.editorconfig",
+    "esbenp.prettier-vscode"
+  ]
 }
