@@ -1,0 +1,21 @@
+{
+  "name": "kimidori.${localWorkspaceFolderBasename}",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "gateway",
+  "workspaceFolder": "/go/kimidori/${localWorkspaceFolderBasename}",
+  "settings": {
+    "go.useLanguageServer": true,
+    "remote.autoForwardPorts": false,
+    "terminal.integrated.profiles.linux": {
+      "zsh": {
+        "path": "/bin/zsh",
+      },
+    },
+    "terminal.integrated.defaultProfile.linux": "zsh"
+  },
+  "extensions": [
+    "golang.go",
+    "editorconfig.editorconfig",
+  ],
+  "forwardPorts": [8080]
+}

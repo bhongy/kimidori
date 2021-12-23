@@ -1,0 +1,29 @@
+version: "3"
+
+networks:
+  kimidori-devcontainer:
+    external: true
+
+services:
+  gateway:
+    image: ghcr.io/simplestruct/vscode-remote-devcontainer.go:1.17.1
+    volumes:
+      # we need to mount at the root so `.git` is included
+      - ../..:/go/kimidori
+      # go module cache, to avoid dependencies re-download on container rebuilds
+      - gomod-cache:/go/pkg/mod/cache
+    networks:
+      - kimidori-devcontainer
+    # prevent the container from shutting down
+    # so we can attach vscode remote container to it
+    stdin_open: true
+    tty: true
+
+    # security and capability needed for ptrace-based debugger for golang
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+
+volumes:
+  gomod-cache:
