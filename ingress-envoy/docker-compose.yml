@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+  front-envoy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+      - /usr/local/bin/envoy
+      - "-c"
+      - /etc/envoy/envoy.yaml
+    volumes:
+      - ./config/envoy.yaml:/etc/envoy/envoy.yaml
+    networks:
+      - kimidori-devcontainer
+    ports:
+      - 8020:8020
+    secrets:
+      - "localhost.crt"
+      - "localhost.key"
+
+networks:
+  kimidori-devcontainer:
+    external: true
+
+secrets:
+  localhost.crt:
+    file: ./secrets/localhost.crt
+  localhost.key:
+    file: ./secrets/localhost.key

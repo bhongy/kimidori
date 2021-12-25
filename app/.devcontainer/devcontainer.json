@@ -3,6 +3,9 @@
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/kimidori/${localWorkspaceFolderBasename}",
+  "settings": {
+    "remote.autoForwardPorts": false
+  },
   "extensions": [
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode"

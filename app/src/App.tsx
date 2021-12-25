@@ -18,13 +18,16 @@ export function App(): React.ReactElement {
 
 function MainPlaceholder(): React.ReactElement {
   const location = useLocation();
-  const page = location === '/profile' ? 'https://thanik.me' : 'about:blank';
+  const page =
+    location === '/profile'
+      ? 'https://localhost:8020/service/profile'
+      : 'about:blank';
   return (
     <iframe
       allow="clipboard-write"
       className="Main"
       frameBorder="0"
-      sandbox=""
+      sandbox="allow-scripts"
       src={page}
     ></iframe>
   );
