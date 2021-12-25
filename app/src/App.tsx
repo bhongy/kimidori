@@ -20,7 +20,7 @@ function MainPlaceholder(): React.ReactElement {
   const location = useLocation();
   const page =
     location === '/profile'
-      ? 'http://localhost:8080/service/profile'
+      ? 'https://localhost:8020/service/profile'
       : 'about:blank';
   return (
     <iframe

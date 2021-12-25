@@ -7,14 +7,20 @@ static_resources:
     - address:
         socket_address:
           address: 0.0.0.0
-          port_value: 8080
+          port_value: 8020
+      listener_filters:
+        - name: envoy.filters.listener.tls_inspector
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.listener.tls_inspector.v3.TlsInspector
       filter_chains:
-        - filters:
+        - filter_chain_match:
+            transport_protocol: tls
+          filters:
             name: envoy.filters.network.http_connection_manager
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
               codec_type: AUTO
-              stat_prefix: ingress_http
+              stat_prefix: ingress_https
               http_filters:
                 - name: envoy.filters.http.router
               # to support parcel hot reload (websocket)
@@ -37,21 +43,40 @@ static_resources:
                           body:
                             inline_string: Hello, from demo!
                       - match:
-                          prefix: "/"
-                          # path: "/"
+                          prefix: /
                         route:
                           cluster: app
-          # TODO: enable TLS, it currently breaks parcel hot reload (websocket)
-          # transport_socket:
-          #   name: envoy.transport_sockets.tls
-          #   typed_config:
-          #     "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
-          #     common_tls_context:
-          #       tls_certificates:
-          #       - certificate_chain:
-          #           filename: /run/secrets/localhost.crt
-          #         private_key:
-          #           filename: /run/secrets/localhost.key
+          transport_socket:
+            name: envoy.transport_sockets.tls
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+              common_tls_context:
+                tls_certificates:
+                  - certificate_chain:
+                      filename: /run/secrets/localhost.crt
+                    private_key:
+                      filename: /run/secrets/localhost.key
+        # http -> https redirect
+        - filter_chain_match:
+            transport_protocol: raw_buffer
+          filters:
+            name: envoy.filters.network.http_connection_manager
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+              codec_type: AUTO
+              stat_prefix: ingress_http
+              http_filters:
+                - name: envoy.filters.http.router
+              route_config:
+                name: local_redirect
+                virtual_hosts:
+                  - name: all
+                    domains: ["*"]
+                    routes:
+                      - match:
+                          prefix: /
+                        redirect:
+                          https_redirect: true
 
   clusters:
     - name: app
@@ -66,6 +91,11 @@ static_resources:
                     socket_address:
                       address: app
                       port_value: 8000
+      # to make parcel hot reload over wss work
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
     - name: profile
       type: STRICT_DNS
       lb_policy: ROUND_ROBIN

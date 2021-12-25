@@ -14,19 +14,17 @@ services:
     networks:
       - kimidori-devcontainer
     ports:
-      - 8080:8080
-      # - 8443:8443
-    # secrets:
-    #   - "localhost.crt"
-    #   - "localhost.key"
+      - 8020:8020
+    secrets:
+      - "localhost.crt"
+      - "localhost.key"
 
 networks:
   kimidori-devcontainer:
     external: true
 
-# /run/secrets
-# secrets:
-#   localhost.crt:
-#     file: ./secrets/localhost.crt
-#   localhost.key:
-#     file: ./secrets/localhost.key
+secrets:
+  localhost.crt:
+    file: ./secrets/localhost.crt
+  localhost.key:
+    file: ./secrets/localhost.key
