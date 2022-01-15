@@ -4,5 +4,10 @@ import {App} from './App';
 
 const container = document.getElementById('react-root');
 if (container) {
-  ReactDOM.render(<App />, container);
+  ReactDOM.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    container,
+  );
 }
