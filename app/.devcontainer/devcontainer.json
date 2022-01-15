@@ -4,6 +4,7 @@
   "service": "app",
   "workspaceFolder": "/kimidori/${localWorkspaceFolderBasename}",
   "settings": {
+    "editor.formatOnSave": true,
     "remote.autoForwardPorts": false
   },
   "extensions": [
