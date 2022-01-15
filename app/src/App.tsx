@@ -16,12 +16,15 @@ export function App(): React.ReactElement {
   );
 }
 
+// TEMPORARY: stub data from the upstream service discovery api
+const pages = new Map([['/profile', 'https://localhost:8020/service/profile']]);
+
 function MainPlaceholder(): React.ReactElement {
   const location = useLocation();
-  const page =
-    location === '/profile'
-      ? 'https://localhost:8020/service/profile'
-      : 'about:blank';
+  const page = pages.get(location);
+  if (!page) {
+    return <NotFound />;
+  }
   return (
     <iframe
       allow="clipboard-write"
@@ -31,6 +34,10 @@ function MainPlaceholder(): React.ReactElement {
       src={page}
     ></iframe>
   );
+}
+
+function NotFound(): React.ReactElement {
+  return <h1>404: Not Found</h1>;
 }
 
 function useLocation(): string {
