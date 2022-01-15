@@ -5,7 +5,7 @@
   "author": "Thanik Bhongbhibhat <email@thanik.me>",
   "license": "MIT",
   "scripts": {
-    "start": "parcel serve './src/index.html' --public-url \"/service/profile\" --port 8000 --lazy"
+    "start": "parcel serve './src/index.html' --public-url \"/service/profile\" --port 8000 --lazy --https"
   },
   "dependencies": {
     "clsx": "1.1.1",
